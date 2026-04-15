@@ -10,6 +10,8 @@ import Composer from './pages/Composer.jsx';
 import Calendar from './pages/Calendar.jsx';
 import Accounts from './pages/Accounts.jsx';
 import Analytics from './pages/Analytics.jsx';
+import PrivacyPolicy from './pages/Privacy.jsx';
+import DataDeletion from './pages/DataDeletion.jsx';
 
 function ProtectedRoute({ children }) {
   const { user, loading } = useAuth();
@@ -38,6 +40,8 @@ export default function App() {
           <Routes>
             <Route path="/login" element={<PublicRoute><Login /></PublicRoute>} />
             <Route path="/register" element={<PublicRoute><Register /></PublicRoute>} />
+            <Route path="/privacy" element={<PrivacyPolicy />} />
+            <Route path="/data-deletion" element={<DataDeletion />} />
             <Route path="/" element={<ProtectedRoute><Layout /></ProtectedRoute>}>
               <Route index element={<Dashboard />} />
               <Route path="posts" element={<Posts />} />

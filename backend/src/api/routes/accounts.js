@@ -13,9 +13,15 @@ const router = express.Router();
 // Allow unauthenticated incoming callbacks and TikTok verification files
 router.get('/callback/:platform', handleCallback);
 
-// TikTok Hardcoded Verifier
-router.get('/callback/tiktok/tiktokJJ2pw9fEETT7TRA250Aa70LmrZDjK5Sv.txt', (req, res) => {
-  res.type('text/plain').send('tiktok-developers-site-verification=JJ2pw9fEETT7TRA250Aa70LmrZDjK5Sv');
+// Dynamic TikTok Verifier (Handles ANY randomly generated file!)
+router.get('/callback/tiktok/:filename', (req, res, next) => {
+  const file = req.params.filename;
+  if (file.startsWith('tiktok') && file.endsWith('.txt')) {
+    // Extract the random hash (e.g., 'JJ2...' from 'tiktokJJ2....txt')
+    const hash = file.substring(6, file.length - 4);
+    return res.type('text/plain').send(`tiktok-developers-site-verification=${hash}`);
+  }
+  next();
 });
 
 router.use(protect);

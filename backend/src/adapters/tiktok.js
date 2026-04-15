@@ -52,6 +52,10 @@ export class TikTokAdapter {
     const video = post.media.find((m) => m.type === 'video');
     if (!video) throw new Error('TikTok only supports video posts.');
 
+    // Construct proxy URL to bypass TikTok's domain verification rules for external media
+    const baseUrl = process.env.FRONTEND_URL || 'https://himal.cloud';
+    const proxyUrl = `${baseUrl}/api/posts/proxy-media?url=${encodeURIComponent(video.url)}`;
+
     // Step 1: Initialize upload
     const { data: initData } = await axios.post(
       `${TT_API}/post/publish/video/init/`,
@@ -65,7 +69,7 @@ export class TikTokAdapter {
         },
         source_info: {
           source: 'PULL_FROM_URL',
-          video_url: video.url,
+          video_url: proxyUrl,
         },
       },
       {

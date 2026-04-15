@@ -2,6 +2,7 @@ import Post from '../models/Post.js';
 import SocialAccount from '../models/SocialAccount.js';
 import { schedulePost, publishPostNow } from '../jobs/postQueue.js';
 import { AppError } from '../middleware/errorHandler.js';
+import axios from 'axios';
 
 export async function getPosts(req, res, next) {
   try {
@@ -121,6 +122,26 @@ export async function publishPost(req, res, next) {
     publishPostNow(post._id.toString()).catch(console.error);
 
     res.json({ success: true, message: 'Publishing started.', post });
+  } catch (err) {
+    next(err);
+  }
+}
+
+export async function proxyMediaUrl(req, res, next) {
+  try {
+    const targetUrl = req.query.url;
+    if (!targetUrl) throw new AppError('Missing url parameter', 400);
+
+    const response = await axios({
+      method: 'get',
+      url: targetUrl,
+      responseType: 'stream',
+    });
+
+    res.set('Content-Type', response.headers['content-type']);
+    res.set('Content-Length', response.headers['content-length']);
+
+    response.data.pipe(res);
   } catch (err) {
     next(err);
   }

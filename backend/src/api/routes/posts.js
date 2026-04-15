@@ -6,10 +6,13 @@ import {
   updatePost,
   deletePost,
   publishPost,
+  proxyMediaUrl,
 } from '../../controllers/postsController.js';
 import { protect } from '../../middleware/auth.js';
 
 const router = express.Router();
+
+router.get('/proxy-media', proxyMediaUrl);
 
 router.use(protect);
 router.get('/', getPosts);

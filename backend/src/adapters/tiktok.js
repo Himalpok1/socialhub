@@ -4,9 +4,10 @@ const TT_API = 'https://open.tiktokapis.com/v2';
 
 export class TikTokAdapter {
   getAuthUrl(userId) {
+    const baseUrl = process.env.FRONTEND_URL || 'https://himal.cloud';
     const params = new URLSearchParams({
       client_key: process.env.TIKTOK_CLIENT_KEY,
-      redirect_uri: process.env.TIKTOK_REDIRECT_URI,
+      redirect_uri: `${baseUrl}/api/accounts/callback/tiktok`,
       scope: 'user.info.basic,video.publish,video.upload',
       response_type: 'code',
       state: userId,
@@ -15,12 +16,13 @@ export class TikTokAdapter {
   }
 
   async exchangeCode(code, state) {
+    const baseUrl = process.env.FRONTEND_URL || 'https://himal.cloud';
     const { data } = await axios.post('https://open.tiktokapis.com/v2/oauth/token/', {
       client_key: process.env.TIKTOK_CLIENT_KEY,
       client_secret: process.env.TIKTOK_CLIENT_SECRET,
       code,
       grant_type: 'authorization_code',
-      redirect_uri: process.env.TIKTOK_REDIRECT_URI,
+      redirect_uri: `${baseUrl}/api/accounts/callback/tiktok`,
     });
 
     const { data: userData } = await axios.get(`${TT_API}/user/info/`, {

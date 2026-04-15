@@ -4,9 +4,10 @@ const FB_API = 'https://graph.facebook.com/v19.0';
 
 export class FacebookAdapter {
   getAuthUrl(userId) {
+    const baseUrl = process.env.FRONTEND_URL || 'https://himal.cloud';
     const params = new URLSearchParams({
       client_id: process.env.FACEBOOK_APP_ID,
-      redirect_uri: process.env.FACEBOOK_REDIRECT_URI,
+      redirect_uri: `${baseUrl}/api/accounts/callback/facebook`,
       scope: 'pages_show_list,pages_read_engagement,pages_manage_posts,pages_manage_metadata,publish_to_groups',
       state: userId,
       response_type: 'code',
@@ -15,11 +16,12 @@ export class FacebookAdapter {
   }
 
   async exchangeCode(code, userId) {
+    const baseUrl = process.env.FRONTEND_URL || 'https://himal.cloud';
     const { data: tokenData } = await axios.get(`${FB_API}/oauth/access_token`, {
       params: {
         client_id: process.env.FACEBOOK_APP_ID,
         client_secret: process.env.FACEBOOK_APP_SECRET,
-        redirect_uri: process.env.FACEBOOK_REDIRECT_URI,
+        redirect_uri: `${baseUrl}/api/accounts/callback/facebook`,
         code,
       },
     });

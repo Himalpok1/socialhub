@@ -74,15 +74,18 @@ export async function handleCallback(req, res, next) {
     const { code, state } = req.query;
     const adapter = getAdapterForPlatform(platform);
 
+    const userId = state; // We encoded the user ID in the state parameter
+    if (!userId) throw new Error("Invalid OAuth callback: Missing state parameter");
+
     const accountData = await adapter.exchangeCode(code, state);
     await SocialAccount.findOneAndUpdate(
-      { user: req.user._id, platform, accountId: accountData.accountId },
-      { ...accountData, user: req.user._id, platform },
+      { user: userId, platform, accountId: accountData.accountId },
+      { ...accountData, user: userId, platform },
       { upsert: true, new: true }
     );
 
     // Redirect to frontend accounts page
-    res.redirect(`${process.env.FRONTEND_URL}/accounts?connected=${platform}`);
+    res.redirect(`${process.env.FRONTEND_URL || ''}/accounts?connected=${platform}`);
   } catch (err) {
     next(err);
   }

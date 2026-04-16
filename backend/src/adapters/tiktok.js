@@ -81,7 +81,7 @@ export class TikTokAdapter {
       {
         headers: {
           Authorization: `Bearer ${account.accessToken}`,
-          'Content-Type': 'application/json',
+          'Content-Type': 'application/json; charset=UTF-8',
         },
       }
     );

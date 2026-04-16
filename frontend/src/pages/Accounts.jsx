@@ -106,26 +106,6 @@ export default function Accounts() {
         </div>
       </div>
 
-      {/* Demo Mode Notice */}
-      <div style={{
-        padding: '14px 18px',
-        background: 'rgba(99, 102, 241, 0.1)',
-        border: '1px solid rgba(99, 102, 241, 0.25)',
-        borderRadius: 'var(--radius-md)',
-        marginBottom: 24,
-        display: 'flex',
-        alignItems: 'center',
-        gap: 12,
-        fontSize: '0.875rem',
-      }}>
-        <span style={{ fontSize: '1.2rem' }}>🎭</span>
-        <div>
-          <strong style={{ color: 'var(--color-primary-light)' }}>Demo Mode Active</strong>
-          <span style={{ color: 'var(--color-text-secondary)', marginLeft: 8 }}>
-            Connecting will add a simulated account. Set your real API credentials in <code style={{ background: 'var(--color-surface-3)', padding: '1px 6px', borderRadius: 4 }}>.env</code> and set <code style={{ background: 'var(--color-surface-3)', padding: '1px 6px', borderRadius: 4 }}>DEMO_MODE=false</code> for live connections.
-          </span>
-        </div>
-      </div>
 
       {/* Platform Cards */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))', gap: 20 }}>

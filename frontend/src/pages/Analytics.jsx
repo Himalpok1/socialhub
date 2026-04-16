@@ -224,9 +224,6 @@ export default function Analytics() {
               {stats.connected ? (
                 <div>
                   <div style={{ fontSize: '0.875rem', color: 'var(--color-success)', marginBottom: 4 }}>● Connected ({stats.accounts} account{stats.accounts > 1 ? 's' : ''})</div>
-                  <div style={{ fontSize: '0.8125rem', color: 'var(--color-text-secondary)' }}>
-                    Demo metrics active
-                  </div>
                 </div>
               ) : (
                 <div style={{ fontSize: '0.875rem', color: 'var(--color-text-muted)' }}>

@@ -87,7 +87,7 @@ export async function handleCallback(req, res, next) {
     const accountData = await adapter.exchangeCode(code, state);
     await SocialAccount.findOneAndUpdate(
       { user: userId, platform, accountId: accountData.accountId },
-      { ...accountData, user: userId, platform },
+      { ...accountData, user: userId, platform, isActive: true },
       { upsert: true, new: true }
     );
 

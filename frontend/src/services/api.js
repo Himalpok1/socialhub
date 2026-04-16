@@ -44,6 +44,13 @@ export const postsApi = {
   update: (id, data) => api.put(`/posts/${id}`, data),
   delete: (id) => api.delete(`/posts/${id}`),
   publish: (id) => api.post(`/posts/${id}/publish`),
+  uploadMedia: (file) => {
+    const formData = new FormData();
+    formData.append('media', file);
+    return api.post('/upload', formData, {
+      headers: { 'Content-Type': 'multipart/form-data' },
+    });
+  },
 };
 
 export const analyticsApi = {

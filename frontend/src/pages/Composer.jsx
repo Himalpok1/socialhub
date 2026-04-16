@@ -24,7 +24,8 @@ export default function Composer() {
   const [scheduledAt, setScheduledAt] = useState('');
   const [hashtags, setHashtags] = useState('');
   const [firstComment, setFirstComment] = useState('');
-  const [mediaUrls, setMediaUrls] = useState('');
+  const [mediaFiles, setMediaFiles] = useState([]);
+  const [uploadingMedia, setUploadingMedia] = useState(false);
 
   // Load post if editing
   useEffect(() => {
@@ -41,6 +42,7 @@ export default function Composer() {
           setScheduledAt(p.scheduledAt ? new Date(p.scheduledAt).toISOString().slice(0, 16) : '');
           setHashtags(p.hashtags?.join(' ') || '');
           setFirstComment(p.firstComment || '');
+          setMediaFiles(p.media || []);
         })
         .catch(() => toast.error('Failed to load post.'))
         .finally(() => setLoading(false));
@@ -75,16 +77,25 @@ export default function Composer() {
     scheduledAt: scheduledAt || undefined,
     hashtags: hashtags.split(/\s+/).filter(Boolean),
     firstComment: firstComment || undefined,
-    media: mediaUrls
-      ? mediaUrls.split('\n').filter(Boolean).map((url) => ({ url: url.trim(), type: 'image' }))
-      : [],
+    media: mediaFiles,
     status,
   });
 
+  const validatePost = (mode) => {
+    if (!content.trim()) { toast.error('Content is required.'); return false; }
+    if (selectedPlatforms.length === 0) { toast.error('Select at least one platform.'); return false; }
+    if (mode === 'schedule' && !scheduledAt) { toast.error('Set a scheduled date/time.'); return false; }
+
+    const requiresMedia = selectedPlatforms.includes('tiktok') || selectedPlatforms.includes('instagram');
+    if (requiresMedia && mediaFiles.length === 0) {
+      toast.error('TikTok and Instagram require at least one image or video attachment!');
+      return false;
+    }
+    return true;
+  };
+
   const handleSave = async (mode) => {
-    if (!content.trim()) { toast.error('Content is required.'); return; }
-    if (selectedPlatforms.length === 0) { toast.error('Select at least one platform.'); return; }
-    if (mode === 'schedule' && !scheduledAt) { toast.error('Set a scheduled date/time.'); return; }
+    if (!validatePost(mode)) return;
 
     setSaving(true);
     try {
@@ -104,8 +115,7 @@ export default function Composer() {
   };
 
   const handlePublishNow = async () => {
-    if (!content.trim()) { toast.error('Content is required.'); return; }
-    if (selectedPlatforms.length === 0) { toast.error('Select at least one platform.'); return; }
+    if (!validatePost('publish')) return;
 
     setSaving(true);
     try {
@@ -127,6 +137,26 @@ export default function Composer() {
   if (loading) {
     return <div className="empty-state"><div className="spinner" style={{ width: 36, height: 36 }} /></div>;
   }
+
+  const handleFileUpload = async (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setUploadingMedia(true);
+    try {
+      const res = await postsApi.uploadMedia(file);
+      setMediaFiles((prev) => [...prev, res.data.media]);
+      toast.success('Media uploaded successfully!');
+    } catch (err) {
+      toast.error('Failed to upload media. Please try again.');
+    } finally {
+      setUploadingMedia(false);
+    }
+  };
+
+  const removeMedia = (index) => {
+    setMediaFiles((prev) => prev.filter((_, i) => i !== index));
+  };
 
   const filteredAccounts = accounts.filter((a) => selectedPlatforms.includes(a.platform));
 
@@ -245,22 +275,47 @@ export default function Composer() {
 
           {/* Media */}
           <div className="card">
-            <div className="card-title" style={{ marginBottom: 16 }}>🖼️ Media (Optional)</div>
-            <div className="dropzone">
-              <div className="dropzone-icon">📎</div>
-              <div style={{ fontWeight: 600, marginBottom: 4 }}>Paste media URLs below</div>
-              <div style={{ fontSize: '0.8125rem', color: 'var(--color-text-muted)', marginBottom: 12 }}>
-                One URL per line (images or publicly accessible video URLs)
-              </div>
-              <textarea
-                id="composer-media-urls"
-                className="form-textarea"
-                placeholder="https://example.com/image.jpg&#10;https://example.com/video.mp4"
-                value={mediaUrls}
-                onChange={(e) => setMediaUrls(e.target.value)}
-                style={{ minHeight: 100, textAlign: 'left', background: 'var(--color-surface-3)' }}
-              />
+            <div className="card-title" style={{ marginBottom: 16 }}>
+              🖼️ Media Attachments
+              {(selectedPlatforms.includes('tiktok') || selectedPlatforms.includes('instagram')) && 
+                <span style={{ fontSize: '0.75rem', color: 'var(--color-error)', marginLeft: 8 }}>* Required</span>
+              }
             </div>
+            
+            <label className="dropzone" style={{ display: 'block', cursor: 'pointer', textAlign: 'center' }}>
+              <input 
+                type="file" 
+                accept="image/*,video/mp4,video/quicktime" 
+                onChange={handleFileUpload} 
+                style={{ display: 'none' }} 
+                disabled={uploadingMedia}
+              />
+              <div className="dropzone-icon">☁️</div>
+              <div style={{ fontWeight: 600, marginBottom: 4 }}>
+                {uploadingMedia ? 'Uploading to Cloudinary...' : 'Click or drag files here'}
+              </div>
+              <div style={{ fontSize: '0.8125rem', color: 'var(--color-text-muted)' }}>
+                Supports JPG, PNG, MP4, MOV (Max 100MB)
+              </div>
+            </label>
+
+            {mediaFiles.length > 0 && (
+              <div style={{ display: 'flex', gap: 12, overflowX: 'auto', marginTop: 16, paddingBottom: 8 }}>
+                {mediaFiles.map((m, idx) => (
+                  <div key={idx} style={{ position: 'relative', width: 100, height: 100, borderRadius: 8, overflow: 'hidden', background: '#000', flexShrink: 0 }}>
+                    {m.type === 'video' ? (
+                      <video src={m.url} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                    ) : (
+                      <img src={m.url} alt="upload" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                    )}
+                    <button 
+                      onClick={() => removeMedia(idx)}
+                      style={{ position: 'absolute', top: 4, right: 4, background: 'rgba(0,0,0,0.7)', color: '#fff', border: 'none', borderRadius: '50%', width: 24, height: 24, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 12 }}
+                    >×</button>
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
         </div>
 

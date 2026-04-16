@@ -11,6 +11,7 @@ import authRoutes from './api/routes/auth.js';
 import accountRoutes from './api/routes/accounts.js';
 import postRoutes from './api/routes/posts.js';
 import analyticsRoutes from './api/routes/analytics.js';
+import uploadRoutes from './api/routes/upload.js';
 import { errorHandler } from './middleware/errorHandler.js';
 import { startWorkers } from './jobs/worker.js';
 import { autoSeedDemo } from './utils/autoSeed.js';
@@ -36,6 +37,7 @@ app.use('/api/auth', authRoutes);
 app.use('/api/accounts', accountRoutes);
 app.use('/api/posts', postRoutes);
 app.use('/api/analytics', analyticsRoutes);
+app.use('/api/upload', uploadRoutes);
 
 // Health check
 app.get('/health', (req, res) => {

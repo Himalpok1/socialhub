@@ -148,7 +148,8 @@ export default function Composer() {
       setMediaFiles((prev) => [...prev, res.data.media]);
       toast.success('Media uploaded successfully!');
     } catch (err) {
-      toast.error('Failed to upload media. Please try again.');
+      const apiError = err.response?.data?.message || err.message || 'Failed';
+      toast.error(`Upload Error: ${apiError}`);
     } finally {
       setUploadingMedia(false);
     }

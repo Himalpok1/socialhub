@@ -93,7 +93,9 @@ export async function handleCallback(req, res, next) {
     // Redirect to frontend accounts page
     res.redirect(`${process.env.FRONTEND_URL || ''}/accounts?connected=${platform}`);
   } catch (err) {
-    next(err);
+    console.error('OAuth processing error:', err.message || err);
+    const errorMsg = err.response?.data?.error?.message || err.response?.data?.message || err.message || 'Unknown processing error';
+    res.redirect(`${process.env.FRONTEND_URL || ''}/accounts?error=${encodeURIComponent(errorMsg)}`);
   }
 }
 

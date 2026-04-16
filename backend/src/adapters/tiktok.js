@@ -63,33 +63,52 @@ export class TikTokAdapter {
     const proxyUrl = `${baseUrl}/api/posts/proxy-media?url=${encodeURIComponent(video.url)}`;
 
     // Step 1: Initialize upload
-    const { data: initData } = await axios.post(
-      `${TT_API}/post/publish/video/init/`,
-      {
-        post_info: {
-          title: post.content.substring(0, 150),
-          privacy_level: 'SELF_ONLY',
-          disable_duet: true,
-          disable_comment: true,
-          disable_stitch: true,
-        },
-        source_info: {
-          source: 'PULL_FROM_URL',
-          video_url: proxyUrl,
-        },
+    const payload = {
+      post_info: {
+        title: post.content.substring(0, 150),
+        privacy_level: 'SELF_ONLY',
+        disable_duet: true,
+        disable_comment: true,
+        disable_stitch: true,
+        brand_content_toggle: false,
+        brand_organic_toggle: false,
       },
-      {
-        headers: {
-          Authorization: `Bearer ${account.accessToken}`,
-          'Content-Type': 'application/json; charset=UTF-8',
-        },
-      }
-    );
-
-    return {
-      platformPostId: initData.data?.publish_id,
-      publishedAt: new Date(),
+      source_info: {
+        source: 'PULL_FROM_URL',
+        video_url: proxyUrl,
+      },
     };
+
+    console.log('TikTok publish payload:', JSON.stringify(payload, null, 2));
+    console.log('TikTok token (first 10 chars):', account.accessToken?.substring(0, 10));
+
+    try {
+      const { data: initData } = await axios.post(
+        `${TT_API}/post/publish/video/init/`,
+        payload,
+        {
+          headers: {
+            Authorization: `Bearer ${account.accessToken}`,
+            'Content-Type': 'application/json; charset=UTF-8',
+          },
+        }
+      );
+
+      console.log('TikTok publish response:', JSON.stringify(initData, null, 2));
+
+      if (initData.error?.code !== 'ok' && initData.error?.code) {
+        throw new Error(`TikTok API Error: ${initData.error.code} - ${initData.error.message}`);
+      }
+
+      return {
+        platformPostId: initData.data?.publish_id,
+        publishedAt: new Date(),
+      };
+    } catch (err) {
+      const respData = err.response?.data;
+      console.error('TikTok publish error response:', JSON.stringify(respData, null, 2));
+      throw new Error(respData?.error?.message || respData?.message || err.message);
+    }
   }
 
   async refreshToken(account) {

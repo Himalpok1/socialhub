@@ -8,7 +8,10 @@ export async function processPublish(job) {
   const { postId } = job.data || job;
   console.log(`📤 Publishing post ${postId}...`);
 
-  const post = await Post.findById(postId).populate('targetAccounts');
+  const post = await Post.findById(postId).populate({
+    path: 'targetAccounts',
+    select: '+accessToken +refreshToken +pageAccessToken',
+  });
   if (!post) {
     console.error(`Post ${postId} not found`);
     return;
@@ -36,12 +39,13 @@ export async function processPublish(job) {
       hasSuccess = true;
       console.log(`✅ Published to ${account.platform}: ${result.platformPostId}`);
     } catch (err) {
-      console.error(`❌ Failed to publish to ${account.platform}:`, err.message);
+      const detailedError = err.response?.data?.error?.message || err.response?.data?.message || err.message;
+      console.error(`❌ Failed to publish to ${account.platform}:`, detailedError);
       results.push({
         platform: account.platform,
         accountId: account._id.toString(),
         status: 'failed',
-        error: err.message,
+        error: detailedError,
       });
       hasFailure = true;
     }

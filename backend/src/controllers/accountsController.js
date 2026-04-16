@@ -71,7 +71,13 @@ export async function connectAccount(req, res, next) {
 export async function handleCallback(req, res, next) {
   try {
     const { platform } = req.params;
-    const { code, state } = req.query;
+    const { code, state, error, error_description } = req.query;
+
+    if (error) {
+      console.error(`OAuth Error from ${platform}:`, error, error_description);
+      return res.redirect(`${process.env.FRONTEND_URL || ''}/accounts?error=${encodeURIComponent(error_description || error)}`);
+    }
+
     const adapter = getAdapterForPlatform(platform);
 
     const userId = state; // We encoded the user ID in the state parameter

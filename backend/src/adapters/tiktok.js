@@ -68,10 +68,10 @@ export class TikTokAdapter {
       {
         post_info: {
           title: post.content.substring(0, 150),
-          privacy_level: 'PUBLIC_TO_EVERYONE',
-          disable_duet: false,
-          disable_comment: false,
-          disable_stitch: false,
+          privacy_level: 'SELF_ONLY',
+          disable_duet: true,
+          disable_comment: true,
+          disable_stitch: true,
         },
         source_info: {
           source: 'PULL_FROM_URL',

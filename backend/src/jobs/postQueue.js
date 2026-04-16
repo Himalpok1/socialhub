@@ -23,7 +23,14 @@ export async function schedulePost(postId, delayMs) {
   return queue.add('schedule', { postId }, { delay: delayMs, jobId: `schedule_${postId}` });
 }
 
+import { processPublish } from './worker.js';
+
 export async function publishPostNow(postId) {
-  const queue = getPublishQueue();
-  return queue.add('publish', { postId }, { jobId: `publish_${postId}_${Date.now()}` });
+  // Execute the publish function instantly in the background without Redis
+  try {
+    processPublish({ postId }).catch(console.error);
+    return true;
+  } catch (err) {
+    console.error('Failed to trigger background publish', err);
+  }
 }

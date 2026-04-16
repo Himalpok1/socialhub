@@ -4,8 +4,8 @@ import Post from '../models/Post.js';
 import SocialAccount from '../models/SocialAccount.js';
 import { getAdapterForPlatform } from '../adapters/index.js';
 
-async function processPublish(job) {
-  const { postId } = job.data;
+export async function processPublish(job) {
+  const { postId } = job.data || job;
   console.log(`📤 Publishing post ${postId}...`);
 
   const post = await Post.findById(postId).populate('targetAccounts');

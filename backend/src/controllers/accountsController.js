@@ -6,6 +6,7 @@ export async function getAccounts(req, res, next) {
   try {
     const accounts = await SocialAccount.find({ user: req.user._id, isActive: true })
       .select('-accessToken -refreshToken -pageAccessToken');
+    res.set('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate');
     res.json({ success: true, accounts });
   } catch (err) {
     next(err);

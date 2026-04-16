@@ -4,24 +4,26 @@ const IG_API = 'https://graph.facebook.com/v19.0';
 
 export class InstagramAdapter {
   getAuthUrl(userId) {
-    // Instagram uses Meta OAuth (same as Facebook)
+    const baseUrl = process.env.FRONTEND_URL || 'https://himal.cloud';
+    // Instagram uses Meta OAuth (same as Facebook), but routes back to the instagram callback
     const params = new URLSearchParams({
       client_id: process.env.FACEBOOK_APP_ID,
-      redirect_uri: process.env.FACEBOOK_REDIRECT_URI,
+      redirect_uri: `${baseUrl}/api/accounts/callback/instagram`,
       scope: 'instagram_basic,instagram_content_publish,pages_show_list,pages_read_engagement',
-      state: `ig_${userId}`,
+      state: userId,
       response_type: 'code',
     });
     return `https://www.facebook.com/v19.0/dialog/oauth?${params}`;
   }
 
   async exchangeCode(code, state) {
+    const baseUrl = process.env.FRONTEND_URL || 'https://himal.cloud';
     // Exchange for FB token first
     const { data: tokenData } = await axios.get(`${IG_API}/oauth/access_token`, {
       params: {
         client_id: process.env.FACEBOOK_APP_ID,
         client_secret: process.env.FACEBOOK_APP_SECRET,
-        redirect_uri: process.env.FACEBOOK_REDIRECT_URI,
+        redirect_uri: `${baseUrl}/api/accounts/callback/instagram`,
         code,
       },
     });

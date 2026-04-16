@@ -17,12 +17,16 @@ export class TikTokAdapter {
 
   async exchangeCode(code, state) {
     const baseUrl = process.env.FRONTEND_URL || 'https://himal.cloud';
-    const { data } = await axios.post('https://open.tiktokapis.com/v2/oauth/token/', {
+    const body = new URLSearchParams({
       client_key: process.env.TIKTOK_CLIENT_KEY,
       client_secret: process.env.TIKTOK_CLIENT_SECRET,
       code,
       grant_type: 'authorization_code',
       redirect_uri: `${baseUrl}/api/accounts/callback/tiktok`,
+    });
+
+    const { data } = await axios.post('https://open.tiktokapis.com/v2/oauth/token/', body, {
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' }
     });
 
     const { data: userData } = await axios.get(`${TT_API}/user/info/`, {

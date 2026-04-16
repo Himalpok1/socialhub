@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { accountsApi } from '../services/api.js';
 import { useToast } from '../context/ToastContext.jsx';
 
@@ -46,7 +47,24 @@ export default function Accounts() {
       .finally(() => setLoading(false));
   };
 
-  useEffect(() => { refreshAccounts(); }, []);
+  const location = useLocation();
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    refreshAccounts();
+
+    const searchParams = new URLSearchParams(location.search);
+    const errorMsg = searchParams.get('error');
+    const connectedMsg = searchParams.get('connected');
+
+    if (errorMsg) {
+      toast.error(`Connection Error: ${errorMsg}`);
+      navigate('/accounts', { replace: true });
+    } else if (connectedMsg) {
+      toast.success(`${connectedMsg.charAt(0).toUpperCase() + connectedMsg.slice(1)} account connected!`);
+      navigate('/accounts', { replace: true });
+    }
+  }, [location.search, navigate, toast]);
 
   const handleConnect = async (platform) => {
     setConnecting(platform);

@@ -131,6 +131,13 @@ export default function Posts() {
                   </td>
                   <td>
                     <span className={`status-badge ${post.status}`}>{post.status}</span>
+                    {['failed', 'partial'].includes(post.status) && post.platformResults && (
+                      <div style={{ marginTop: 8, fontSize: '0.75rem', color: 'var(--color-error)', maxWidth: 200, wordWrap: 'break-word' }}>
+                        {post.platformResults.filter(r => r.status === 'failed').map(r => (
+                          <div key={r.platform}><strong>{r.platform}:</strong> {r.error}</div>
+                        ))}
+                      </div>
+                    )}
                   </td>
                   <td style={{ fontSize: '0.8125rem', color: 'var(--color-text-secondary)', whiteSpace: 'nowrap' }}>
                     {post.scheduledAt ? new Date(post.scheduledAt).toLocaleString() : '—'}
